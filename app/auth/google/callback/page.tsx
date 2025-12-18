@@ -1,30 +1,20 @@
-"use client";
+import { Suspense } from "react";
+import GoogleCallbackClient from "./GoogleCallbackClient";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+export const dynamic = "force-dynamic"; // ✅ VERY IMPORTANT
 
 export default function GoogleCallbackPage() {
-  const router = useRouter();
-  const params = useSearchParams();
-  const { login } = useAuth();
+  return (
+    <Suspense fallback={<Loading />}>
+      <GoogleCallbackClient />
+    </Suspense>
+  );
+}
 
-  useEffect(() => {
-    const token = params.get("token");
-
-    if (token) {
-      login(token);
-      router.replace("/scan");
-    } else {
-      router.replace("/auth/sign-in");
-    }
-  }, [params, login, router]);
-
+function Loading() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <p className="text-zinc-400 text-sm">
-        Signing you in with Google…
-      </p>
+      <p className="text-zinc-400 text-sm">Signing you in...</p>
     </div>
   );
 }
