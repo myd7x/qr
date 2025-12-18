@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
+  const { isAuthenticated, logout } = useAuth();
+
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -33,7 +36,7 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
+        {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500 text-emerald-400 flex items-center justify-center font-bold">
             Q
@@ -43,7 +46,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-8 text-sm">
           {links.map((link) => (
             <NavLink
@@ -54,24 +57,39 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Auth Actions */}
+        {/* DESKTOP AUTH */}
         <div className="hidden md:flex items-center gap-4">
-          <Link
-            href="/login"
-            className="text-zinc-300 hover:text-zinc-100 transition"
-          >
-            Login
-          </Link>
+          {!isAuthenticated ? (
+            <>
+              <Link
+                href="/auth/sign-in"
+                className="text-zinc-300 hover:text-zinc-100 transition"
+              >
+                Login
+              </Link>
 
-          <Link
-            href="/register"
-            className="px-4 py-2 rounded-lg bg-emerald-500 text-zinc-950 font-medium shadow-lg shadow-emerald-500/20"
-          >
-            Get Started
-          </Link>
+              <Link
+                href="/auth/sign-up"
+                className="px-4 py-2 rounded-lg bg-emerald-500
+                           text-zinc-950 font-medium
+                           shadow-lg shadow-emerald-500/20"
+              >
+                Get Started
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={logout}
+              className="px-4 py-2 rounded-lg
+                         bg-emerald-600 text-black
+                         hover:bg-emerald-500 transition"
+            >
+              Logout
+            </button>
+          )}
         </div>
 
-        {/* Mobile Toggle */}
+        {/* MOBILE TOGGLE */}
         <button
           onClick={() => setOpen(!open)}
           className="md:hidden text-zinc-100 text-xl"
@@ -80,7 +98,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -104,21 +122,37 @@ export default function Navbar() {
 
               <div className="border-t border-zinc-800 my-2" />
 
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="text-zinc-300"
-              >
-                Login
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link
+                    href="/auth/sign-in"
+                    onClick={() => setOpen(false)}
+                    className="text-zinc-300"
+                  >
+                    Login
+                  </Link>
 
-              <Link
-                href="/register"
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 text-center rounded-lg bg-emerald-500 text-zinc-950 font-medium"
-              >
-                Get Started
-              </Link>
+                  <Link
+                    href="/auth/sign-up"
+                    onClick={() => setOpen(false)}
+                    className="px-4 py-2 text-center rounded-lg
+                               bg-emerald-500 text-zinc-950 font-medium"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    logout();
+                    setOpen(false);
+                  }}
+                  className="px-4 py-2 rounded-lg
+                             bg-emerald-600 text-black"
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </motion.div>
         )}
@@ -128,7 +162,7 @@ export default function Navbar() {
 }
 
 /* ---------------------------------- */
-/* Nav Link Component */
+/* NAV LINK WITH HOVER UNDERLINE */
 /* ---------------------------------- */
 function NavLink({
   label,
@@ -148,7 +182,8 @@ function NavLink({
       <motion.span
         variants={{ hover: { scaleX: 1 } }}
         initial={{ scaleX: 0 }}
-        className="absolute left-0 -bottom-1 w-full h-[2px] bg-emerald-400 origin-left"
+        className="absolute left-0 -bottom-1 w-full h-[2px]
+                   bg-emerald-400 origin-left"
       />
     </motion.div>
   );

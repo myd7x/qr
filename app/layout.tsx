@@ -1,22 +1,22 @@
-import Navbar from "@/components/Navbar";
 import "./globals.css";
 import CustomCursor from "@/components/ui/CustomCursor";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/ui/ScrollProgress";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { AuthProvider } from "@/context/AuthContext";
+import Navbar from "@/components/layout/Navbar";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <AuthProvider>
           <ScrollProgress />
-         <CustomCursor/>
-        <Navbar />
-        <main className="pt-20">{children}</main>
-         <Footer />
+          <CustomCursor />
+          <Navbar/>
+          <main className="pt-20">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

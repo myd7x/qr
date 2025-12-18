@@ -1,16 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { motion } from "motion/react";
+import { extractQrFromImage } from "@/lib/qr/extractQrFromImage";
 
-export default function QRUploadBox() {
+type Props = {
+  onQrExtracted: (url: string) => void;
+};
+
+export default function QRUploadBox({ onQrExtracted }: Props) {
   const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFile = (file: File) => {
+  /* ---------------------------------
+     Cleanup object URL (IMPORTANT)
+  ---------------------------------- */
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  const handleFile = async (file: File): Promise<void> => {
     if (!file.type.startsWith("image/")) return;
-    const url = URL.createObjectURL(file);
-    setPreview(url);
+
+    setError(null);
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+
+    const qrData = await extractQrFromImage(file);
+
+    if (!qrData) {
+      setError("No QR code detected in the image.");
+      return;
+    }
+
+    onQrExtracted(qrData);
   };
 
   return (
@@ -23,9 +50,8 @@ export default function QRUploadBox() {
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          handleFile(e.dataTransfer.files[0]);
-        }
+        const file = e.dataTransfer.files?.[0];
+        if (file) handleFile(file);
       }}
     >
       <input
@@ -33,9 +59,8 @@ export default function QRUploadBox() {
         accept="image/*"
         className="hidden"
         onChange={(e) => {
-          if (e.target.files && e.target.files[0]) {
-            handleFile(e.target.files[0]);
-          }
+          const file = e.target.files?.[0];
+          if (file) handleFile(file);
         }}
       />
 
@@ -54,9 +79,15 @@ export default function QRUploadBox() {
           src={preview}
           alt="QR Preview"
           fill
-          unoptimized   // IMPORTANT for local blob URLs
+          unoptimized
           className="object-contain bg-black"
         />
+      )}
+
+      {error && (
+        <span className="absolute bottom-2 text-xs text-red-400">
+          {error}
+        </span>
       )}
     </motion.label>
   );
