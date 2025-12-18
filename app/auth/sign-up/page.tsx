@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // ✅ ADD
 import { signUp } from "@/lib/api/auth2";
 
 export default function SignUpPage() {
+  const router = useRouter(); // ✅ ADD
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,26 +14,35 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const submit = async () => {
-    setError(null);
+ const submit = async () => {
+  setError(null);
 
-    if (password !== passwordConfirm) {
-      setError("Passwords do not match");
-      return;
-    }
+  if (password !== passwordConfirm) {
+    setError("Passwords do not match");
+    return;
+  }
 
-    try {
-      await signUp(
-        username,
-        email,
-        password,
-        passwordConfirm
-      );
-      setSuccess(true);
-    } catch (e: any) {
-      setError(e.message);
-    }
-  };
+  try {
+    await signUp(username, email, password, passwordConfirm);
+
+    setSuccess(true);
+
+    // ✅ SAVE FOR AUTO-FILL
+    sessionStorage.setItem(
+      "signup_autofill",
+      JSON.stringify({ email, password })
+    );
+
+    // ✅ REDIRECT
+    setTimeout(() => {
+      router.replace("/auth/sign-in");
+    }, 1200);
+
+  } catch (e: any) {
+    setError(e.message);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -72,9 +84,10 @@ export default function SignUpPage() {
         {error && (
           <p className="text-red-400 text-sm">{error}</p>
         )}
+
         {success && (
           <p className="text-emerald-400 text-sm">
-            Account created successfully. You can sign in.
+            Account created successfully. Redirecting to sign in…
           </p>
         )}
 

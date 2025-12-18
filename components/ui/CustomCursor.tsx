@@ -4,10 +4,23 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 export default function CustomCursor() {
+  const [enabled, setEnabled] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [hover, setHover] = useState(false);
 
+  // ✅ Detect touch devices (mobile / tablet)
   useEffect(() => {
+    const isTouch = window.matchMedia(
+      "(hover: none) and (pointer: coarse)"
+    ).matches;
+
+    setEnabled(!isTouch);
+  }, []);
+
+  // ⛔ Do not render cursor on mobile
+  useEffect(() => {
+    if (!enabled) return;
+
     const move = (e: MouseEvent) => {
       setPos({ x: e.clientX, y: e.clientY });
     };
@@ -22,8 +35,14 @@ export default function CustomCursor() {
 
     return () => {
       window.removeEventListener("mousemove", move);
+      targets.forEach((el) => {
+        el.removeEventListener("mouseenter", () => setHover(true));
+        el.removeEventListener("mouseleave", () => setHover(false));
+      });
     };
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null; // ✅ mobile safe
 
   return (
     <motion.div
