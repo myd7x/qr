@@ -7,7 +7,7 @@ export async function checkUrl(
   const token = tokenStorage.get();
 
   if (!token) {
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized Pleaze Login");
   }
 
   const res = await fetch("/api/scan", {

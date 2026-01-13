@@ -40,3 +40,23 @@ export async function signUp(
 
   return data;
 }
+export async function forgotPassword(email: string) {
+  const res = await fetch(
+    "https://qrguard.onrender.com/forgotPassword",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to send reset email");
+  }
+
+  return data;
+}

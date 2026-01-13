@@ -1,34 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/api/auth2";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignUpPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     setError(null);
 
-    if (password !== passwordConfirm) {
-      setError("Passwords do not match");
+    if (!username || !email || !password || !passwordConfirm) {
+      setError("All fields are required.");
       return;
     }
 
+    if (password !== passwordConfirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await signUp(
+      const data = await signUp(
         username,
         email,
         password,
         passwordConfirm
       );
-      setSuccess(true);
+
+      // ✅ AUTO LOGIN
+      if (data?.token) {
+        login(data.token);
+        router.push("/scan");
+        return;
+      }
+
+      throw new Error("Signup succeeded but no token returned.");
     } catch (e: any) {
-      setError(e.message);
+      setError(e?.message || "Sign up failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,17 +94,13 @@ export default function SignUpPage() {
         {error && (
           <p className="text-red-400 text-sm">{error}</p>
         )}
-        {success && (
-          <p className="text-emerald-400 text-sm">
-            Account created successfully. You can sign in.
-          </p>
-        )}
 
         <button
           onClick={submit}
-          className="w-full mt-4 py-3 rounded-lg bg-emerald-600 text-black"
+          disabled={loading}
+          className="w-full mt-4 py-3 rounded-lg bg-emerald-600 text-black disabled:opacity-60"
         >
-          Sign Up
+          {loading ? "Creating account..." : "Sign Up"}
         </button>
       </div>
     </div>

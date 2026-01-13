@@ -1,20 +1,24 @@
-export default function GoogleButton() {
+"use client";
+
+const API_URL = "https://qrguard.onrender.com";
+
+export default function GoogleAuthButton() {
   const handleGoogleLogin = () => {
-    window.location.href =
-      "https://qrguard.onrender.com/auth/google";
+    window.location.href = `${API_URL}/google`;
   };
 
   return (
     <button
+      type="button"
       onClick={handleGoogleLogin}
-      className="w-full flex items-center justify-center gap-3
-                 rounded-lg border border-zinc-700
-                 bg-black/40 py-3 text-sm
+      className="mt-6 flex w-full items-center justify-center gap-3
+                 rounded-lg border border-zinc-700 py-3 text-sm
                  hover:border-emerald-500 transition"
     >
-      <image
-        href="https://www.svgrepo.com/show/475656/google-color.svg"
-        className="w-5 h-5"
+      <img
+        src="https://www.svgrepo.com/show/475656/google-color.svg"
+        alt="Google"
+        className="h-5 w-5"
       />
       Continue with Google
     </button>
